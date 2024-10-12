@@ -59,7 +59,7 @@ export async function makeCETUSPTB(txb: Transaction, poolId: string, byAmountIn:
             typeArguments: [coinTypeB]
         })
 
-        return { swappedToken: receive_coin_b, coinleft: coin_a }
+        return { receiveCoin: receive_coin_b, leftCoin: coin_a }
     }
 
     const [pay_coin_a] = txb.moveCall({
@@ -79,17 +79,17 @@ export async function makeCETUSPTB(txb: Transaction, poolId: string, byAmountIn:
         typeArguments: [coinTypeA, coinTypeB]
     })
 
-    const leftCoinB: any = txb.moveCall({
+    const leftCoin: any = txb.moveCall({
         target: `0x2::coin::from_balance`,
         arguments: [cetusReceiveB],
         typeArguments: [coinTypeB]
     })
-    const receiveACoin: any = txb.moveCall({
+    const receiveCoin: any = txb.moveCall({
         target: `0x2::coin::from_balance`,
         arguments: [cetusReceiveA],
         typeArguments: [coinTypeA]
     })
 
-    return { receiveACoin, leftCoinB }
+    return { receiveCoin, leftCoin }
 
 }

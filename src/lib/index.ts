@@ -18,21 +18,35 @@ export async function getCoins(client: SuiClient, address: string, coinType: any
 export async function getRoutePTBWithCoin(txb: Transaction, tokenA: string, tokenB: string, coinIn: TransactionResult, amountIn: number, minAmountOut: number, userAddress: string) {
 
     const data = await getRoutes(tokenA, tokenB, amountIn);
-    const routerSui = JSON.parse(JSON.stringify(data.data.routes));
-
+    const allPaths = JSON.parse(JSON.stringify(data.data.routes));
     const referral = 0;
-    let currentCoin: any = coinIn;
+    if (!data.data.routes || data.data.routes.length === 0) {
+        throw new Error("No routes found in data");
+    }
 
-    for (let i = 0; i < routerSui.length; i++) {
-        const path = routerSui[i];
+    if (Number(data.data.amount_in) !== data.data.routes.reduce((sum: number, route: any) => sum + Number(route.amount_in), 0)) {
+        throw new Error("Outer amount_in does not match the sum of route amount_in values");
+    }
+
+    const finalCoinB = txb.moveCall({
+        target: '0x2::coin::zero',
+        typeArguments: [tokenB]
+    })
+
+    for (let i = 0; i < allPaths.length; i++) {
+        const path = allPaths[i];
+        const pathCoinAmountIn = Math.floor(path.amount_in);
+        const pathCoinAmountOut = path.amount_out;
+        console.log(`Path Index: `, i, `Amount In: `, pathCoinAmountIn, `Expected Amount Out: `, pathCoinAmountOut)
+        let pathTempCoin: any = txb.splitCoins(coinIn, [pathCoinAmountIn]);
 
         for (let j = 0; j < path.path.length; j++) {
             const route = path.path[j];
 
             const poolId = route.id;
             const provider = route.provider;
-            const tokenA = route.from;
-            const tokenB = route.target;
+            const tempTokenA = route.from;
+            const tempTokenB = route.target;
             const a2b = route.a2b;
             const typeArguments = route.info_for_ptb.typeArguments;
 
@@ -42,39 +56,44 @@ export async function getRoutePTBWithCoin(txb: Transaction, tokenA: string, toke
             if (provider === 'turbos') {
                 tuborsVersion = route.info_for_ptb.contractVersionId;
             }
-            console.log(`Route Index: `, j, `provider: `, provider, `from: `, tokenA, `to: `, tokenB)
+            console.log(`Route Index: `, i, '-', j, `provider: `, provider, `from: `, tempTokenA, `to: `, tempTokenB)
 
             amountInPTB = txb.moveCall({
                 target: '0x2::coin::value',
-                arguments: [currentCoin],
-                typeArguments: [tokenA]
+                arguments: [pathTempCoin],
+                typeArguments: [tempTokenA]
             });
 
             if (provider === 'cetus') {
                 let toSwapBalance = txb.moveCall({
                     target: '0x2::coin::into_balance',
-                    arguments: [currentCoin],
-                    typeArguments: [tokenA],
+                    arguments: [pathTempCoin],
+                    typeArguments: [tempTokenA],
                 });
-                const { receiveACoin, leftCoinB } = await makeCETUSPTB(txb, poolId, true, toSwapBalance, amountInPTB, a2b, typeArguments);
+                const { receiveCoin, leftCoin } = await makeCETUSPTB(txb, poolId, true, toSwapBalance, amountInPTB, a2b, typeArguments);
 
-                txb.transferObjects([leftCoinB], userAddress);
-                currentCoin = receiveACoin;
+                txb.transferObjects([leftCoin], userAddress);
+                pathTempCoin = receiveCoin;
+
             } else if (provider === 'turbos') {
-                currentCoin = txb.makeMoveVec({
-                    elements: [currentCoin!],
+                pathTempCoin = txb.makeMoveVec({
+                    elements: [pathTempCoin!],
                 });
-                const { turbosCoinB, turbosCoinA } = await makeTurbosPTB(txb, poolId, true, currentCoin, amountInPTB, a2b, typeArguments, userAddress, tuborsVersion);
+                const { turbosCoinB, turbosCoinA } = await makeTurbosPTB(txb, poolId, true, pathTempCoin, amountInPTB, a2b, typeArguments, userAddress, tuborsVersion);
                 txb.transferObjects([turbosCoinA], userAddress);
-                currentCoin = turbosCoinB;
+                pathTempCoin = turbosCoinB;
             }
         }
+
+        txb.mergeCoins(finalCoinB, [pathTempCoin]);
     }
+
+    txb.transferObjects([coinIn], userAddress);
 
     txb.moveCall({
         target: `${config.AGGREGATORCONTRACT}::slippage::check_slippage_v2`,
         arguments: [
-            currentCoin, // output coin object
+            finalCoinB, // output coin object
             txb.pure.u64(minAmountOut), // min amount out
             txb.pure.u64(amountIn), // amount in
             txb.pure.u64(referral) // refferal id
@@ -82,5 +101,5 @@ export async function getRoutePTBWithCoin(txb: Transaction, tokenA: string, toke
         typeArguments: [tokenA, tokenB],
     })
 
-    return currentCoin;
+    return finalCoinB;
 }
