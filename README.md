@@ -20,10 +20,6 @@ Ensure you have a .env file set up with the following variables:
 MNEMONIC=<your_wallet_mnemonic>
 RPC=<your_sui_rpc_url>
 apiBaseURL = <api_url>
-AGGREGATORCONTRACT = <Slippage_Contract_ID>
-CETUSPackageID = <Cetus_Contract_ID>
-CETUSConfigID = <Cetus_config_Contract_ID>
-TURBOSPackageID = <Turbos_Contract_ID>
 ```
 
 ## Usage
@@ -33,11 +29,11 @@ Explanation of Parameters:
 * userAddress: The address of the user initiating the transaction.
 * tokenA: Address of the token being swapped from.
 * tokenB: Address of the token being swapped to.
-* amount_in: The amount of tokenA to swap.
-* slippage: Acceptable percentage of slippage for the swap.
+* amountIn: The amount of tokenA to swap.
+* minAmountOut: Acceptable Minmium to Receive.
 
 ```Typescript
 import {getRoutePTB} from 'navi-aggregator-sdk/dist/src';
 
-export async function getRoutePTB(client: SuiClient, txb: Transaction, userAddress: string, tokenA: string, tokenB: string, amount_in: number, slippage: number): Transaction
+export async function getRoutePTB(client: SuiClient, txb: Transaction, userAddress: string, tokenA: string, tokenB: string, amountIn: number, minAmountOut: number): Transaction
 ```
