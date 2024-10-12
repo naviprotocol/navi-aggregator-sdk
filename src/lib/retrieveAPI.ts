@@ -11,7 +11,7 @@ export async function getRoutes(
     amount: number,
     byAmountIn = true,
     depth = 3,
-    providers = 'CETUS'
+    providers = 'cetus'
 ) {
     if (!BASE_URL) {
         throw new Error("API base URL is not set");
