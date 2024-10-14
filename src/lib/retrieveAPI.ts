@@ -9,9 +9,9 @@ export async function getRoutes(
     tokenA: string,
     tokenB: string,
     amount: number,
-    providers: string[],
     byAmountIn = true,
     depth = 3,
+    providers = 'cetus'
 ) {
     if (!BASE_URL) {
         throw new Error("API base URL is not set");
@@ -22,7 +22,7 @@ export async function getRoutes(
         amount: amount.toString(),
         by_amount_in: byAmountIn,
         depth,
-        providers: providers.length > 0 ? providers.join(',') : undefined
+        providers
     };
 
     try {
