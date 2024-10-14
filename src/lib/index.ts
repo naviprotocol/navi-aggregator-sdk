@@ -91,7 +91,7 @@ export async function getRoutePTBWithCoin(txb: Transaction, tokenA: string, toke
     txb.transferObjects([coinIn], userAddress);
 
     txb.moveCall({
-        target: `${config.AGGREGATORCONTRACT}::slippage::check_slippage_v2`,
+        target: `${config.NAVIAGGREGATORCONTRACT}::slippage::check_slippage_v2`,
         arguments: [
             finalCoinB, // output coin object
             txb.pure.u64(minAmountOut), // min amount out
