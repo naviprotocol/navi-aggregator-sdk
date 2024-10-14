@@ -24,7 +24,8 @@ export async function getRoutePTB(
     tokenA: string,
     tokenB: string,
     amountIn: number,
-    minAmountOut: number
+    minAmountOut: number,
+    providers?: string[]
 ): Promise<Transaction> {
     let coinA: TransactionResult;
 
@@ -45,7 +46,7 @@ export async function getRoutePTB(
     }
 
     // Get the output coin from the swap route and transfer it to the user
-    const finalCoinB = await getRoutePTBWithCoin(txb, tokenA, tokenB, coinA, amountIn, minAmountOut, userAddress);
+    const finalCoinB = await getRoutePTBWithCoin(txb, tokenA, tokenB, coinA, amountIn, minAmountOut, userAddress, providers);
     txb.transferObjects([finalCoinB], userAddress);
 
     return txb;
