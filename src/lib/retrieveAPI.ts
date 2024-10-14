@@ -2,8 +2,7 @@ import axios from 'axios';
 import * as dotenv from "dotenv";
 
 dotenv.config();
-export const BASE_URL = process.env.apiBaseURL || undefined;
-
+export const BASE_URL = process.env.NAVI_DEX_AGGREGATOR_API_BASE_URL || undefined;
 
 export async function getRoutes(
     tokenA: string,
