@@ -15,9 +15,9 @@ export async function getCoins(client: SuiClient, address: string, coinType: any
     return coinDetails;
 }
 
-export async function getRoutePTBWithCoin(txb: Transaction, tokenA: string, tokenB: string, coinIn: TransactionResult, amountIn: number, minAmountOut: number, userAddress: string) {
+export async function getRoutePTBWithCoin(txb: Transaction, tokenA: string, tokenB: string, coinIn: TransactionResult, amountIn: number, minAmountOut: number, userAddress: string, providers?: string[]) {
 
-    const data = await getRoutes(tokenA, tokenB, amountIn);
+    const data = await getRoutes(tokenA, tokenB, amountIn, providers ? providers : []);
     const allPaths = JSON.parse(JSON.stringify(data.data.routes));
     const referral = 0;
     if (!data.data.routes || data.data.routes.length === 0) {
