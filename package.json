@@ -1,6 +1,6 @@
 {
   "name": "navi-aggregator-sdk",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "NAVI Aggregator for Sui Defi Ecosystem",
   "main": "dist/main.js",
   "scripts": {
