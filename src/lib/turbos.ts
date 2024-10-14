@@ -12,7 +12,7 @@ export async function makeTurbosPTB(txb: Transaction, poolId: string, byAmountIn
     const ONE_MINUTE = 60 * 1000;
 
     const [turbosCoinB, turbosCoinA] = txb.moveCall({
-        target: `${config.TURBOSPackageID}::swap_router::swap_${a2b ? 'a_b' : 'b_a'}_with_return_`,
+        target: `${config.TURBOSPACKAGEID}::swap_router::swap_${a2b ? 'a_b' : 'b_a'}_with_return_`,
         arguments: [
             txb.object(poolId),
             coinA,

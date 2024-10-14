@@ -12,9 +12,9 @@ export async function makeCETUSPTB(txb: Transaction, poolId: string, byAmountIn:
     const sqrtPriceLimit = BigInt(a2b ? '4295048016' : '79226673515401279992447579055')
 
     const [cetusReceiveA, cetusReceiveB, cetusflashReceipt] = txb.moveCall({
-        target: `${config.CETUSPackageID}::pool::flash_swap`,
+        target: `${config.CETUSPACKAGEID}::pool::flash_swap`,
         arguments: [
-            txb.object(config.CETUSConfigID),
+            txb.object(config.CETUSCONFIGID),
             txb.object(poolId),
             txb.pure.bool(a2b),
             txb.pure.bool(byAmountIn),
@@ -25,7 +25,7 @@ export async function makeCETUSPTB(txb: Transaction, poolId: string, byAmountIn:
         typeArguments: [coinTypeA, coinTypeB]
     })
     txb.moveCall({
-        target: `${config.CETUSPackageID}::pool::swap_pay_amount`,
+        target: `${config.CETUSPACKAGEID}::pool::swap_pay_amount`,
         arguments: [cetusflashReceipt],
         typeArguments: [coinTypeA, coinTypeB]
     })
@@ -37,9 +37,9 @@ export async function makeCETUSPTB(txb: Transaction, poolId: string, byAmountIn:
         })
 
         txb.moveCall({
-            target: `${config.CETUSPackageID}::pool::repay_flash_swap`,
+            target: `${config.CETUSPACKAGEID}::pool::repay_flash_swap`,
             arguments: [
-                txb.object(config.CETUSConfigID),
+                txb.object(config.CETUSCONFIGID),
                 txb.object(poolId),
                 coinA,
                 pay_coin_b,
@@ -68,9 +68,9 @@ export async function makeCETUSPTB(txb: Transaction, poolId: string, byAmountIn:
     })
 
     txb.moveCall({
-        target: `${config.CETUSPackageID}::pool::repay_flash_swap`,
+        target: `${config.CETUSPACKAGEID}::pool::repay_flash_swap`,
         arguments: [
-            txb.object(config.CETUSConfigID),
+            txb.object(config.CETUSCONFIGID),
             txb.object(poolId),
             pay_coin_a,
             coinA,

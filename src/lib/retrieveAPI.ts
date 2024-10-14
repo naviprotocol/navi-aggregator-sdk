@@ -1,8 +1,5 @@
 import axios from 'axios';
-import * as dotenv from "dotenv";
-
-dotenv.config();
-export const BASE_URL = process.env.NAVI_DEX_AGGREGATOR_API_BASE_URL || undefined;
+import { config } from '../config';
 
 export async function getRoutes(
     tokenA: string,
@@ -12,7 +9,7 @@ export async function getRoutes(
     depth = 3,
     providers = 'cetus'
 ) {
-    if (!BASE_URL) {
+    if (!config.BASE_URL) {
         throw new Error("API base URL is not set");
     }
     const params = {
@@ -25,7 +22,7 @@ export async function getRoutes(
     };
 
     try {
-        const { data } = await axios.get(BASE_URL, { params });
+        const { data } = await axios.get(config.BASE_URL, { params });
 
         if (!data) {
             throw new Error('No data returned from the API.');
@@ -33,7 +30,7 @@ export async function getRoutes(
 
         return data;
     } catch (error: any) {
-        console.error(`Error fetching routes from ${BASE_URL} with params ${JSON.stringify(params)}:`, error.message);
+        console.error(`Error fetching routes from ${config.BASE_URL} with params ${JSON.stringify(params)}:`, error.message);
         throw error;
     }
 }
