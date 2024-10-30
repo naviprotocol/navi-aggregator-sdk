@@ -1,8 +1,6 @@
 import { Transaction } from "@mysten/sui/transactions";
 import { config } from "../config";
 
-
-
 export async function makeCETUSPTB(txb: Transaction, poolId: string, byAmountIn: boolean, coinA: any, amount: any, a2b: boolean, typeArguments: any) {
 
 

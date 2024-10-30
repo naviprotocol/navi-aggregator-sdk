@@ -1,44 +1,33 @@
 import { Transaction, TransactionResult } from "@mysten/sui/transactions";
-import { getRoutes } from "./retrieveAPI";
-import { SuiClient } from "@mysten/sui/dist/cjs/client";
 import { makeCETUSPTB } from "./cetus";
 import { makeTurbosPTB } from "./turbos";
 import { config } from "../config";
+import { Router } from "../types";
 
-export async function getCoins(
-  client: SuiClient,
-  address: string,
-  coinType: any = "0x2::sui::SUI"
-) {
-  const coinAddress = coinType.address ? coinType.address : coinType;
 
-  const coinDetails = await client.getCoins({
-    owner: address,
-    coinType: coinAddress,
-  });
-  return coinDetails;
-}
-
-export async function getRoutePTBWithCoin(
-  txb: Transaction,
-  tokenA: string,
-  tokenB: string,
-  coinIn: TransactionResult,
-  amountIn: number,
-  minAmountOut: number,
-  userAddress: string,
-  providers?: string[]
-) {
-  const data = await getRoutes(tokenA, tokenB, amountIn, providers ? providers : []);
-  const allPaths = JSON.parse(JSON.stringify(data.data.routes));
-  const referral = 0;
-  if (!data.data.routes || data.data.routes.length === 0) {
+/**
+ * Executes a swap route using the provided parameters.
+ *
+ * @param {string} userAddress - The user's address.
+ * @param {number} minAmountOut - The minimum amount of the output coin.
+ * @param {Transaction} txb - The transaction object.
+ * @param {TransactionResult} coinIn - The input coin transaction result.
+ * @param {Router} router - The router object containing swap routes.
+ * @returns {Promise<TransactionResult>} - The final output coin transaction result.
+ * @throws {Error} - Throws an error if no routes are found or if the outer amount_in does not match the sum of route amount_in values.
+ */
+export async function swapRoutePTB(userAddress: string, minAmountOut: number, txb: Transaction, coinIn: TransactionResult, router: Router): Promise<TransactionResult> {
+  if (!router.routes || router.routes.length === 0) {
     throw new Error("No routes found in data");
   }
-
+  const tokenA = router.from;
+  const tokenB = router.target;
+  const referral = 0;
+  const allPaths = JSON.parse(JSON.stringify(router.routes));
+  console.log(`tokenA: ${tokenA}, tokenB: ${tokenB}`);
   if (
-    Number(data.data.amount_in) !==
-    data.data.routes.reduce(
+    Number(router.amount_in) !==
+    router.routes.reduce(
       (sum: number, route: any) => sum + Number(route.amount_in),
       0
     )
@@ -149,8 +138,8 @@ export async function getRoutePTBWithCoin(
     target: `${config.AGGREGATORCONTRACT}::slippage::check_slippage_v2`,
     arguments: [
       finalCoinB, // output coin object
-      txb.pure.u64(minAmountOut), // min amount out
-      txb.pure.u64(amountIn), // amount in
+      txb.pure.u64(Math.floor(minAmountOut)), // min amount out
+      txb.pure.u64(router.amount_in), // amount in
       txb.pure.u64(referral), // refferal id
     ],
     typeArguments: [tokenA, tokenB],
