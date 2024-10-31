@@ -19,7 +19,7 @@ export async function getRoute(
     fromCoin: string,
     toCoin: string,
     amountIn: number | string | bigint,
-    swapOptions?: { dexList?: string[], byAmountIn?: boolean, depth?: number }
+    swapOptions: { dexList?: string[], byAmountIn?: boolean, depth?: number } = { dexList: ['cetus'], byAmountIn: true, depth: 3 }
 ): Promise<Router> {
     if (!config.BASE_URL) {
         throw new Error("API base URL is not set");
