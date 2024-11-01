@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 export const config = {
-  BASE_URL: process.env.NAVI_DEX_AGGREGATOR_API_BASE_URL || "",
+  BASE_URL: process.env.NAVI_DEX_AGGREGATOR_API_BASE_URL || "https://aggregator-api.naviprotocol.io/find_routes",
   AGGREGATORCONTRACT:
     "0x88dfe5e893bc9fa984d121e4d0d5b2e873dc70ae430cf5b3228ae6cb199cb32b",
   CETUSPACKAGEID:
