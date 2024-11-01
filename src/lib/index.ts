@@ -3,6 +3,9 @@ import { makeCETUSPTB } from "./cetus";
 import { makeTurbosPTB } from "./turbos";
 import { config } from "../config";
 import { Router } from "../types";
+import { makeKriyaV3PTB } from "./kriyaV3";
+import { makeAftermathPTB } from "./aftermath";
+import { makeKriyaV2PTB } from "./KriyaV2";
 
 
 /**
@@ -65,6 +68,7 @@ export async function swapRoutePTB(userAddress: string, minAmountOut: number, tx
       const tempTokenB = route.target;
       const a2b = route.a2b;
       const typeArguments = route.info_for_ptb.typeArguments;
+      const amountOut = route.amount_out;
 
       let amountInPTB;
       let tuborsVersion;
@@ -126,6 +130,15 @@ export async function swapRoutePTB(userAddress: string, minAmountOut: number, tx
         );
         txb.transferObjects([turbosCoinA], userAddress);
         pathTempCoin = turbosCoinB;
+      }
+      else if (provider === "kriyaV3") {
+        pathTempCoin = await makeKriyaV3PTB(txb, poolId, true, pathTempCoin, amountInPTB, a2b, typeArguments)
+      }
+      else if (provider === "aftermath") {
+        pathTempCoin = await makeAftermathPTB(txb, poolId, pathTempCoin, amountOut, a2b, typeArguments)
+      }
+      else if (provider === "kriyaV2") {
+        pathTempCoin = await makeKriyaV2PTB(txb, poolId, true, pathTempCoin, amountInPTB, a2b, typeArguments)
       }
     }
 
