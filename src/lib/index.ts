@@ -131,15 +131,16 @@ export async function swapRoutePTB(userAddress: string, minAmountOut: number, tx
         txb.transferObjects([turbosCoinA], userAddress);
         pathTempCoin = turbosCoinB;
       }
+      else if (provider === "kriyaV2") {
+        pathTempCoin = await makeKriyaV2PTB(txb, poolId, true, pathTempCoin, amountInPTB, a2b, typeArguments)
+      }
       else if (provider === "kriyaV3") {
         pathTempCoin = await makeKriyaV3PTB(txb, poolId, true, pathTempCoin, amountInPTB, a2b, typeArguments)
       }
       else if (provider === "aftermath") {
         pathTempCoin = await makeAftermathPTB(txb, poolId, pathTempCoin, amountOut, a2b, typeArguments)
       }
-      else if (provider === "kriyaV2") {
-        pathTempCoin = await makeKriyaV2PTB(txb, poolId, true, pathTempCoin, amountInPTB, a2b, typeArguments)
-      }
+
     }
 
     txb.mergeCoins(finalCoinB, [pathTempCoin]);
