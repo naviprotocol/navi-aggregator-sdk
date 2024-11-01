@@ -22,7 +22,7 @@ const amount = 1e6;    // 1e9 = 1 SUI
 const slippage = 10; // 5% slippage
 const minAmountOut = 1e5; // Minimum amount of tokenB to receive is 1 wUSDC
 
-swap(account.address, account.client, tokenA, tokenB, amount, minAmountOut, true, account.keypair).then(async res => {
+swap(account.address, account.client, tokenA, tokenB, amount, minAmountOut, { isDryRun: true }).then(async res => {
     console.log(await res.status);
     console.log(await res.balanceChanges);
 });
