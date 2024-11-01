@@ -1,7 +1,8 @@
 export enum Dex {
     Cetus = 'cetus',
     Turbos = 'turbos',
-    Kriya = 'kriya',
+    KriyaV2 = 'kriyaV2',
+    KriyaV3 = 'kriyaV3',
     Aftermath = 'aftermath'
 }
 

@@ -68,7 +68,6 @@ export async function swapRoutePTB(userAddress: string, minAmountOut: number, tx
       const tempTokenB = route.target;
       const a2b = route.a2b;
       const typeArguments = route.info_for_ptb.typeArguments;
-      const amountOut = route.amount_out;
 
       let amountInPTB;
       let tuborsVersion;
@@ -138,7 +137,8 @@ export async function swapRoutePTB(userAddress: string, minAmountOut: number, tx
         pathTempCoin = await makeKriyaV3PTB(txb, poolId, true, pathTempCoin, amountInPTB, a2b, typeArguments)
       }
       else if (provider === "aftermath") {
-        pathTempCoin = await makeAftermathPTB(txb, poolId, pathTempCoin, amountOut, a2b, typeArguments)
+        const amountLimit = route.info_for_ptb.amountLimit;
+        pathTempCoin = await makeAftermathPTB(txb, poolId, pathTempCoin, amountLimit, a2b, typeArguments)
       }
 
     }

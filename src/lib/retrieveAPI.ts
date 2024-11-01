@@ -25,17 +25,21 @@ export async function getRoute(
     if (!config.BASE_URL) {
         throw new Error("API base URL is not set");
     }
-    const params = {
+    const params = new URLSearchParams({
         from: fromCoin,
         target: toCoin,
         amount: (typeof amountIn === 'bigint' ? Number(amountIn) : amountIn).toString(),
-        by_amount_in: swapOptions?.byAmountIn !== undefined ? swapOptions.byAmountIn : true,
-        depth: swapOptions?.depth !== undefined ? swapOptions.depth : 3,
-        providers: swapOptions?.dexList && swapOptions.dexList.length > 0 ? swapOptions.dexList.join(',') : undefined
-    };
-
+        by_amount_in: swapOptions?.byAmountIn !== undefined ? swapOptions.byAmountIn.toString() : 'true',
+        depth: swapOptions?.depth !== undefined ? swapOptions.depth.toString() : '3',
+    }).toString();
+    let dexString = '';
+    if (swapOptions?.dexList && swapOptions.dexList.length > 0) {
+        dexString = swapOptions.dexList.map(dex => `providers=${dex}`).join('&');
+    }
+    
+    const fullParams = dexString ? `${params}&${dexString}` : params;
     try {
-        const { data } = await axios.get(config.BASE_URL, { params });
+        const { data } = await axios.get(`${config.BASE_URL}?${fullParams}`);
 
         if (!data) {
             throw new Error('No data returned from the API.');
