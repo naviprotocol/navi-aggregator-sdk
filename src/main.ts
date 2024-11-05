@@ -33,7 +33,7 @@ export async function swapPTB(
     coin: TransactionResult,
     amountIn: number | string | bigint,
     minAmountOut: number,
-    swapOptions: { dexList?: Dex[], byAmountIn?: boolean, depth?: number } = { dexList: [Dex.Cetus], byAmountIn: true, depth: 3 }
+    swapOptions: { dexList?: Dex[], byAmountIn?: boolean, depth?: number } = { dexList: [], byAmountIn: true, depth: 3 }
 ): Promise<Transaction> {
 
     // Get the output coin from the swap route and transfer it to the user
@@ -70,7 +70,7 @@ export async function swap(
     toCoin: string,
     amountIn: number | string | bigint,
     minAmountOut: number,
-    swapOptions: { dexList?: Dex[], byAmountIn?: boolean, depth?: number, isDryRun?: boolean, keypair?: Ed25519Keypair } = { dexList: [Dex.Cetus], byAmountIn: true, depth: 3, isDryRun: true, keypair: undefined }
+    swapOptions: { dexList?: Dex[], byAmountIn?: boolean, depth?: number, isDryRun?: boolean, keypair?: Ed25519Keypair } = { dexList: [], byAmountIn: true, depth: 3, isDryRun: true, keypair: undefined }
 ) {
     const txb = new Transaction();
     txb.setSender(address);

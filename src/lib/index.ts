@@ -19,13 +19,12 @@ import { makeKriyaV2PTB } from "./KriyaV2";
  * @returns {Promise<TransactionResult>} - The final output coin transaction result.
  * @throws {Error} - Throws an error if no routes are found or if the outer amount_in does not match the sum of route amount_in values.
  */
-export async function swapRoutePTB(userAddress: string, minAmountOut: number, txb: Transaction, coinIn: TransactionResult, router: Router): Promise<TransactionResult> {
+export async function swapRoutePTB(userAddress: string, minAmountOut: number, txb: Transaction, coinIn: TransactionResult, router: Router, referral: number = 0): Promise<TransactionResult> {
   if (!router.routes || router.routes.length === 0) {
     throw new Error("No routes found in data");
   }
   const tokenA = router.from;
   const tokenB = router.target;
-  const referral = 0;
   const allPaths = JSON.parse(JSON.stringify(router.routes));
   console.log(`tokenA: ${tokenA}, tokenB: ${tokenB}`);
   if (
