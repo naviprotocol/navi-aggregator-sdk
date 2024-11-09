@@ -21,7 +21,7 @@ export { Dex, Router, SwapOptions } from './types';
  * @param {number | string | bigint} amountIn - The amount of the input coin.
  * @param {number} minAmountOut - The minimum amount of the output coin.
  * @param {SwapOptions} [swapOptions] - Optional swap options.
- * @returns {Promise<Transaction>} - The final transaction object.
+ * @returns {Promise<TransactionResult>} - The final transaction object.
  */
 export async function swapPTB(
     address: string,
@@ -31,15 +31,14 @@ export async function swapPTB(
     coin: TransactionResult,
     amountIn: number | string | bigint,
     minAmountOut: number,
-    swapOptions: SwapOptions = { dexList: [], byAmountIn: true, depth: 3 }
-): Promise<Transaction> {
+    swapOptions: SwapOptions = { referer: 'https://www.navi.ag/', dexList: [], byAmountIn: true, depth: 3 }
+): Promise<TransactionResult> {
 
     // Get the output coin from the swap route and transfer it to the user
     const router = await import('./lib/retrieveAPI').then(module => module.getRoute(fromCoin, toCoin, amountIn, swapOptions));
     const finalCoinB = await import('./lib').then(module => module.swapRoutePTB(address, minAmountOut, txb, coin, router));
-    txb.transferObjects([finalCoinB], address);
 
-    return txb;
+    return finalCoinB;
 }
 
 
@@ -64,14 +63,15 @@ export async function swap(
     toCoin: string,
     amountIn: number | string | bigint,
     minAmountOut: number,
-    swapOptions: SwapOptions = { dexList: [], byAmountIn: true, depth: 3, isDryRun: true, keypair: undefined }
+    swapOptions: SwapOptions = { referer: 'https://www.navi.ag/', dexList: [], byAmountIn: true, depth: 3, isDryRun: true, keypair: undefined }
 ) {
     const txb = new Transaction();
     txb.setSender(address);
 
     const coinA = await getCoinPTB(address, fromCoin, amountIn, txb, client);
 
-    await swapPTB(address, txb, fromCoin, toCoin, coinA, amountIn, minAmountOut, swapOptions);
+    const finalCoinB = await swapPTB(address, txb, fromCoin, toCoin, coinA, amountIn, minAmountOut, swapOptions);
+    txb.transferObjects([finalCoinB], address);
 
     if (swapOptions.isDryRun) {
         const dryRunTxBytes: Uint8Array = await txb.build({

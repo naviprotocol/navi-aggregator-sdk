@@ -18,6 +18,7 @@ export type Router = {
 }
 
 export type SwapOptions = {
+    referer: string;
     dexList?: Dex[];
     byAmountIn?: boolean;
     depth?: number;

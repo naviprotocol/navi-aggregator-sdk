@@ -17,7 +17,7 @@ export async function getRoute(
     fromCoin: string,
     toCoin: string,
     amountIn: number | string | bigint,
-    swapOptions: SwapOptions = { dexList: [], byAmountIn: true, depth: 3 }
+    swapOptions: SwapOptions = { referer: 'https://www.navi.ag/', dexList: [], byAmountIn: true, depth: 3 },
 ): Promise<Router> {
     if (!config.BASE_URL) {
         throw new Error("API base URL is not set");
@@ -43,7 +43,11 @@ export async function getRoute(
 
     try {
         // Make the API request to fetch the swap route
-        const { data } = await axios.get(`${config.BASE_URL}?${fullParams}`);
+        const { data } = await axios.get(`${config.BASE_URL}?${fullParams}`, {
+            headers: {
+                'referer': swapOptions.referer
+            }
+        });
 
         if (!data) {
             throw new Error('No data returned from the API.');
