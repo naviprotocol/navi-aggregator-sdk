@@ -47,7 +47,7 @@ const coinB = await swapPTB(
 ```
 * Swap function
 
-The swap function is a wrapper for the getRoute and swapPTB functions. Set `isDryRun` from `swapOptions` to true to get a dry run result and balance changes. It will submit the transaction and return the result if `isDryRun` is set to false and a `keypair` is provided.
+The swap function is a wrapper for the getRoute and swapPTB functions. Set `isDryRun` from `swapOptions` to true to get a dry run result and balance changes. It will submit the transaction and return the result if a `keypair` is provided.
 ```typescript
 import { swap } from 'navi-aggregator-sdk';
 
