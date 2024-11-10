@@ -1,6 +1,6 @@
 import { NAVISDKClient } from "navi-sdk";
 import * as dotenv from "dotenv";
-import { swap } from '../src/main';
+import { swap, getRoute } from '../src/main';
 
 dotenv.config();
 
@@ -22,7 +22,12 @@ const amount = 1e6;    // 1e9 = 1 SUI
 const slippage = 10; // 5% slippage
 const minAmountOut = 1e5; // Minimum amount of tokenB to receive is 1 wUSDC
 
-swap(account.address, account.client, tokenA, tokenB, amount, minAmountOut, { isDryRun: true }).then(async res => {
+swap(account.address, account.client, tokenA, tokenB, amount, minAmountOut).then(async res => {
     console.log(await res.status);
     console.log(await res.balanceChanges);
+});
+
+getRoute(tokenA, tokenB, amount).then(async res => {
+    console.log(res.amount_in);
+    console.log(res.amount_out);
 });

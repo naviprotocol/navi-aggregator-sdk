@@ -3,11 +3,12 @@ import { Transaction, TransactionResult } from '@mysten/sui/transactions';
 import { SuiClient } from '@mysten/sui/dist/cjs/client';
 import { Ed25519Keypair } from '@mysten/sui/dist/cjs/keypairs/ed25519';
 import { getCoinPTB, parseSwapTransactionResult } from './utils';
-import { Dex } from './types';
+import { Dex, SwapOptions } from './types';
     
 export { swapRoutePTB } from './lib';
 export { getRoute } from './lib/retrieveAPI';
-export { Dex, Router } from './types';
+export { Dex, Router, SwapOptions } from './types';
+
 
 /**
  * Executes a swap transaction using the provided parameters.
@@ -19,11 +20,8 @@ export { Dex, Router } from './types';
  * @param {TransactionResult} coin - The transaction result object.
  * @param {number | string | bigint} amountIn - The amount of the input coin.
  * @param {number} minAmountOut - The minimum amount of the output coin.
- * @param {Object} [swapOptions] - Optional swap options.
- * @param {Dex[]} [swapOptions.dexList] - List of DEXs to use.
- * @param {boolean} [swapOptions.byAmountIn] - Whether to swap by amount in.
- * @param {number} [swapOptions.depth] - The depth of the swap.
- * @returns {Promise<Transaction>} - The final transaction object.
+ * @param {SwapOptions} [swapOptions] - Optional swap options.
+ * @returns {Promise<TransactionResult>} - The final transaction object.
  */
 export async function swapPTB(
     address: string,
@@ -33,35 +31,30 @@ export async function swapPTB(
     coin: TransactionResult,
     amountIn: number | string | bigint,
     minAmountOut: number,
-    swapOptions: { dexList?: Dex[], byAmountIn?: boolean, depth?: number } = { dexList: [Dex.Cetus], byAmountIn: true, depth: 3 }
-): Promise<Transaction> {
+    swapOptions: SwapOptions = { referer: 'https://www.navi.ag/', dexList: [], byAmountIn: true, depth: 3 }
+): Promise<TransactionResult> {
 
     // Get the output coin from the swap route and transfer it to the user
     const router = await import('./lib/retrieveAPI').then(module => module.getRoute(fromCoin, toCoin, amountIn, swapOptions));
     const finalCoinB = await import('./lib').then(module => module.swapRoutePTB(address, minAmountOut, txb, coin, router));
-    txb.transferObjects([finalCoinB], address);
 
-    return txb;
+    return finalCoinB;
 }
 
 
+
 /**
- * Executes a swap transaction using the provided parameters.
+ * Executes a swap operation between two coins.
  *
- * @param {string} address - The user's address.
- * @param {SuiClient} client - The Sui client instance.
- * @param {string} fromCoin - The coin to swap from.
- * @param {string} toCoin - The coin to swap to.
- * @param {number | string | bigint} amountIn - The amount of the input coin.
- * @param {number} minAmountOut - The minimum amount of the output coin.
- * @param {Object} [swapOptions] - Optional swap options.
- * @param {Dex[]} [swapOptions.dexList] - List of DEXs to use.
- * @param {boolean} [swapOptions.byAmountIn] - Whether to swap by amount in.
- * @param {number} [swapOptions.depth] - The depth of the swap.
- * @param {boolean} [swapOptions.isDryRun] - Whether to perform a dry run of the transaction.
- * @param {Ed25519Keypair} [swapOptions.keypair] - The keypair for signing the transaction.
- * @returns {Promise<Object>} - The transaction result or dry run result.
- * @throws {Error} - Throws an error if the keypair is not provided for signing and submitting the transaction.
+ * @param {string} address - The user's address initiating the swap.
+ * @param {SuiClient} client - The Sui client instance for blockchain interaction.
+ * @param {string} fromCoin - The coin type to swap from.
+ * @param {string} toCoin - The coin type to swap to.
+ * @param {number | string | bigint} amountIn - The amount of the input coin to swap.
+ * @param {number} minAmountOut - The minimum acceptable amount of the output coin.
+ * @param {SwapOptions} [swapOptions] - Optional parameters for the swap operation.
+ * @returns {Promise<Object>} - Returns a promise that resolves to the transaction result or dry run result.
+ * @throws {Error} - Throws an error if keypair is not provided for non-dry run transactions.
  */
 export async function swap(
     address: string,
@@ -70,14 +63,15 @@ export async function swap(
     toCoin: string,
     amountIn: number | string | bigint,
     minAmountOut: number,
-    swapOptions: { dexList?: Dex[], byAmountIn?: boolean, depth?: number, isDryRun?: boolean, keypair?: Ed25519Keypair } = { dexList: [Dex.Cetus], byAmountIn: true, depth: 3, isDryRun: true, keypair: undefined }
+    swapOptions: SwapOptions = { referer: 'https://www.navi.ag/', dexList: [], byAmountIn: true, depth: 3, isDryRun: true, keypair: undefined }
 ) {
     const txb = new Transaction();
     txb.setSender(address);
 
     const coinA = await getCoinPTB(address, fromCoin, amountIn, txb, client);
 
-    await swapPTB(address, txb, fromCoin, toCoin, coinA, amountIn, minAmountOut, swapOptions);
+    const finalCoinB = await swapPTB(address, txb, fromCoin, toCoin, coinA, amountIn, minAmountOut, swapOptions);
+    txb.transferObjects([finalCoinB], address);
 
     if (swapOptions.isDryRun) {
         const dryRunTxBytes: Uint8Array = await txb.build({

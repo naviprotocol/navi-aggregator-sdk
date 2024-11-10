@@ -3,6 +3,9 @@ import { makeCETUSPTB } from "./cetus";
 import { makeTurbosPTB } from "./turbos";
 import { config } from "../config";
 import { Router } from "../types";
+import { makeKriyaV3PTB } from "./kriyaV3";
+import { makeAftermathPTB } from "./aftermath";
+import { makeKriyaV2PTB } from "./KriyaV2";
 
 
 /**
@@ -16,13 +19,12 @@ import { Router } from "../types";
  * @returns {Promise<TransactionResult>} - The final output coin transaction result.
  * @throws {Error} - Throws an error if no routes are found or if the outer amount_in does not match the sum of route amount_in values.
  */
-export async function swapRoutePTB(userAddress: string, minAmountOut: number, txb: Transaction, coinIn: TransactionResult, router: Router): Promise<TransactionResult> {
+export async function swapRoutePTB(userAddress: string, minAmountOut: number, txb: Transaction, coinIn: TransactionResult, router: Router, referral: number = 0): Promise<TransactionResult> {
   if (!router.routes || router.routes.length === 0) {
     throw new Error("No routes found in data");
   }
   const tokenA = router.from;
   const tokenB = router.target;
-  const referral = 0;
   const allPaths = JSON.parse(JSON.stringify(router.routes));
   console.log(`tokenA: ${tokenA}, tokenB: ${tokenB}`);
   if (
@@ -127,6 +129,17 @@ export async function swapRoutePTB(userAddress: string, minAmountOut: number, tx
         txb.transferObjects([turbosCoinA], userAddress);
         pathTempCoin = turbosCoinB;
       }
+      else if (provider === "kriyaV2") {
+        pathTempCoin = await makeKriyaV2PTB(txb, poolId, true, pathTempCoin, amountInPTB, a2b, typeArguments)
+      }
+      else if (provider === "kriyaV3") {
+        pathTempCoin = await makeKriyaV3PTB(txb, poolId, true, pathTempCoin, amountInPTB, a2b, typeArguments)
+      }
+      else if (provider === "aftermath") {
+        const amountLimit = route.info_for_ptb.amountLimit;
+        pathTempCoin = await makeAftermathPTB(txb, poolId, pathTempCoin, amountLimit, a2b, typeArguments)
+      }
+
     }
 
     txb.mergeCoins(finalCoinB, [pathTempCoin]);
