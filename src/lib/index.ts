@@ -6,6 +6,7 @@ import { Router } from "../types";
 import { makeKriyaV3PTB } from "./kriyaV3";
 import { makeAftermathPTB } from "./aftermath";
 import { makeKriyaV2PTB } from "./KriyaV2";
+import { makeDeepbookPTB } from "./deepbook";
 
 
 /**
@@ -139,7 +140,20 @@ export async function swapRoutePTB(userAddress: string, minAmountOut: number, tx
         const amountLimit = route.info_for_ptb.amountLimit;
         pathTempCoin = await makeAftermathPTB(txb, poolId, pathTempCoin, amountLimit, a2b, typeArguments)
       }
+      else if (provider === "deepbook") {
+        const amountLimit = route.info_for_ptb.amountLimit;
+        if (a2b) {
+          const { baseCoinOut, quoteCoinOut, deepCoinOut } = await makeDeepbookPTB(txb, poolId, pathTempCoin, amountLimit, a2b, typeArguments)
+          pathTempCoin = quoteCoinOut;
+          txb.transferObjects([baseCoinOut, deepCoinOut], userAddress);
+        }
+        else {
+          const { baseCoinOut, quoteCoinOut, deepCoinOut } = await makeDeepbookPTB(txb, poolId, pathTempCoin, amountLimit, a2b, typeArguments)
+          pathTempCoin = baseCoinOut;
+          txb.transferObjects([quoteCoinOut, deepCoinOut], userAddress);
+        }
 
+      }
     }
 
     txb.mergeCoins(finalCoinB, [pathTempCoin]);

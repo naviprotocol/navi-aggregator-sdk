@@ -32,6 +32,10 @@ export const config = {
     "0xf0c40d67b078000e18032334c3325c47b9ec9f3d9ae4128be820d54663d14e3b",
   AFTERMATH_REFERRAL_VAULT:
     "0x35d35b0e5b177593d8c3a801462485572fc30861e6ce96a55af6dc4730709278",
+  DEEPBOOK_PACKAGEID:
+    "0x2c8d603bc51326b8c13cef9dd07031a408a48dddb541963357661df5d3204809",
+  DEEPTOKEN_ADDRESS:
+    "0xdeeb7a4662eec9f2f3def03fb937a663dddaa2e215b8078a284d026b7946c270::deep::DEEP",
 };
 
 export function updateConfig(newConfig: Partial<typeof config>) {
